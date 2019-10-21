@@ -1,0 +1,146 @@
+<html>
+<head>
+	<style>
+	.on { color: red }
+	</style>
+    <script src="https://unpkg.com/vue@2.6.10/dist/vue.js"></script>
+	<script type="text/x-template" id="pagination">
+	 <div>
+		  <a href="#none" @click.prevent="onClickFirstPage" :disabled="isInFirstPage">First</a>
+		  <a href="#none" @click.prevent="onClickPreviousPage" :disabled="isInFirstPage">Previous</a>
+		<template v-for="page in pages">
+		  &nbsp;<a href="#none" @click.prevent="onClickPage(page.no)" :disabled="page.isDisabled"
+			:class="{ on: isPageActive(page.no) }">{{ page.no }}</a>&nbsp;
+		</template>
+
+		   <a href="#none" @click.prevent="onClickNextPage" :disabled="isInLastPage">Next</a>
+		   <a href="#none" @click.prevent="onClickLastPage" :disabled="isInLastPage">Last</a>
+	  </div>
+	</script>
+    <script>
+        var json = [{ no: 2, title : '타이틀2'}, { no: 1, title : '타이틀1'}, { no: 1, title : '타이틀1'}, { no: 1, title : '타이틀1'}, { no: 1, title : '타이틀1'}, { no: 1, title : '타이틀1'}, { no: 1, title : '타이틀1'}];
+        	console.log(json);
+        
+        	Vue.component('pagination', {
+				template: '#pagination',
+        		props: {
+					pageButtons: {
+					  type: Number,
+					  required: false,
+					  default: 10
+					},
+					totalRows: {
+					  type: Number,
+					  required: true
+					},
+					rowsPerPage: {
+					  type: Number,
+					  required: true
+					},
+					currentPage: {
+					  type: Number,
+					  required: true
+					}
+				},
+				created: function () {
+					
+				  },
+				  computed: {
+					totalPages : function() {
+					  return Math.ceil(this.totalRows / this.rowsPerPage);
+					},
+					startPage : function() {
+						return Math.floor((this.currentPage - 1) / this.rowsPerPage) * this.rowsPerPage + 1;	
+					},
+					endPage: function() {
+						return Math.min(this.startPage + this.pageButtons - 1, this.totalPages);
+					},
+					pages: function() {
+					  var range = [];
+			
+					  for (var i = this.startPage; i <= this.endPage; i+= 1 ) {
+						range.push({
+						  no: i,
+						  isDisabled: i === this.currentPage 
+						});
+					  }
+			
+					  return range;
+					},
+					isInFirstPage: function() {
+					  return this.currentPage === 1;
+					},
+					isInLastPage: function() {
+					  return this.currentPage === this.totalPages;
+					},
+				  },
+				  methods: {
+					onClickFirstPage: function() {
+						if (this.isInFirstPage){
+							return;
+						}
+					  this.$emit('pagechanged', 1);
+					},
+					onClickPreviousPage: function() {
+						if (this.isInFirstPage){
+							return;
+						}
+					  this.$emit('pagechanged', this.currentPage - 1);
+					},
+					onClickPage: function(page) {
+						if (this.currentPage  === page) {
+							return;
+						}
+					  this.$emit('pagechanged', page);
+					},
+					onClickNextPage: function() {
+						if (this.isInLastPage){
+							return;
+						}
+					  this.$emit('pagechanged', this.currentPage + 1);
+					},
+					onClickLastPage: function() {
+						if (this.isInLastPage){
+							return;
+						}
+					  this.$emit('pagechanged', this.totalPages);    
+					},
+					isPageActive: function(page) {
+					  return this.currentPage === page;
+					}
+				  }
+            });
+    </script>
+</head>
+
+<body>
+    <div id="app">
+        <pagination
+			:rows-per-page="search.rowsPerPage"
+		   :total-rows="search.totalRows"		   
+		   :current-page="search.page"
+		   @pagechanged="getList"
+		 />
+    </div>
+    <script>
+		var app = new Vue({
+			el : '#app',
+			data : {
+				search : {
+					rowsPerPage: 10, // 표시 행 수
+					totalRows : 314, // 총 행 수
+					page : 1 // 현재 page 번호
+				}
+			},
+			methods: {
+				getList(page) {
+				  console.log(page)
+				  this.search.page = page;
+				}
+			}
+		});
+		console.log(app.search);
+    </script>
+</body>
+
+</html>
